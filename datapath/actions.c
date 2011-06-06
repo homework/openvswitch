@@ -28,6 +28,12 @@
 #include "vlan.h"
 #include "vport.h"
 
+/* Alex, symbol exported by klogger */
+extern int klog(struct sk_buff *skb, gfp_t priority); 
+/*
+ * Note: best replaced with an `#include "klogger.h"` stmt
+ */
+
 static int do_execute_actions(struct datapath *, struct sk_buff *,
 			      struct sw_flow_actions *acts);
 
@@ -423,6 +429,19 @@ int execute_actions(struct datapath *dp, struct sk_buff *skb)
 	/* Really execute actions. */
 	if (dp->sflow_probability)
 		sflow_sample(dp, skb, acts);
+
+	/* Alex */
+	if (is_ip(skb)) {
+		/* 
+		 * pass an skb clone to hwdb's klogger because
+		 * it is possible to skb_linearize fragments.
+		 *
+		 * in datapath.c, ~line 595, gfp is GFP_ATOMIC
+		 */
+		if (klog(skb_clone(skb,  GFP_ATOMIC),  GFP_ATOMIC))
+			printk(KERN_INFO "[hwdb] klog failed\n");
+	}
+
 	OVS_CB(skb)->tun_id = 0;
 	error = do_execute_actions(dp, skb, acts);
 

@@ -60,3 +60,15 @@ openvswitch_headers += \
 both_modules += brcompat
 brcompat_sources = linux-2.6/compat-2.6/genetlink-brcompat.c brcompat.c
 brcompat_headers =
+
+both_modules += klogger
+klogger_sources = \
+	klogger.c \
+	hashtable.c \
+	hwdbflow.c
+klogger_headers = \
+	klogger.h \
+	hashtable.h \
+	hwdbflow.h \
+	khwdb.h \
+	debug.h
